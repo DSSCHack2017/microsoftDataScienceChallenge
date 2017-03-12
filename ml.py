@@ -42,13 +42,15 @@ def create_df_for_ticker(ticker):
     cd.columns = ['Polarity', 'Subjectivity']
     cd = df.join(cd)
     cd = cd.drop('SPY', 1)
+    cd[ticker] = cd[ticker].apply(lambda x: 1 if x > 0 else 0)
 
     return cd
 
-msft = create_df_for_ticker('MSFT')
-msft = msft.fillna(method='backfill')
+aapl = create_df_for_ticker('AAPL')
+aapl = aapl.fillna(method='backfill')
 
-msft.to_csv("data/msft_complete.csv")
+print(aapl)
+aapl.to_csv("data/aapl_binary.csv")
 # # Initialize the model class.
 # model = LinearRegression()
 # # Fit the model to the training data.
