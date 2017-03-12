@@ -2,11 +2,12 @@ import requests
 from bs4 import BeautifulSoup
 import threading
 from datetime import timedelta, date
+from textblob import TextBlob
+import json
 
 
-# tickers = ['JP', 'KS', 'CH', 'HK', 'AAPL']
-tickers = ['AAPL']
-# tickers = ['JP', 'KS', 'CH', 'HK']
+tickers = ['AAPL', 'MSFT', 'GOOG']
+
 
 def get_news(link):
     base_link = "http://www.reuters.com/"
@@ -39,36 +40,37 @@ def get_sentiment_for_date(ticker, date):
     for link in links:
         if link['href'][:8] == "/article":
             links_to_articles.append(link)
-    print("Links to articles", links_to_articles)
+    # print("Links to articles", links_to_articles)
     day_news = ' '.join(list(map(lambda link: get_news(link['href']), links_to_articles)))
     if day_news:
-        print(day_news)
-    sentiments[ticker][date] = get_sentiment_of_news(day_news)
+        # print(day_news)
+        sentiments[ticker][date] = get_sentiment_of_news(day_news)
 
 
 def get_sentiment_of_news(news):
-    return 1
-
+    sent = TextBlob(news)
+    return [sent.sentiment.polarity, sent.sentiment.subjectivity]
 sentiments = {}
 
-def main():
 
+def main():
     def daterange(start_date, end_date):
-        for n in range(int((end_date - start_date).days)):
+        for n in range(0, int((end_date - start_date).days)):
             yield start_date + timedelta(n)
 
     # start_date = date(2007, 1, 4)
     # end_date = date(2016, 12, 31)
-    start_date = date(2013, 9, 9)
-    end_date = date(2013, 9, 11)
+    start_date = date(2012, 1, 1)
+    end_date = date(2017, 1, 10)
     for ticker in tickers:
         sentiments[ticker] = {}
         for single_date in daterange(start_date, end_date):
+            print(single_date, ticker)
             str_date = single_date.strftime("%m%d%Y")
-            print(str_date)
             t = threading.Thread(target=get_sentiment_for_date, args=(ticker, str_date))
             t.start()
             t.join()
-    print(sentiments)
+        with open('data/' + ticker + ".json", 'w') as outfile:
+            json.dump(sentiments[ticker], outfile)
 
 main()
