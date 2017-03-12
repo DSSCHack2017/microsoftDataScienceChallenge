@@ -72,13 +72,41 @@ const drawAxis = () => {
 	const axisGenerator = d3.line().x(d => d.x).y(d => d.y)
 
 	APP.append("path")
-	   .attr("d", axisGenerator([DIMENSIONS.bottomLeft, DIMENSIONS.topLeft]))
-	   .attr("stroke", "white")
-	   .attr("stroke-width", STROKE_WIDTH)
-	APP.append("path")
 	   .attr("d", axisGenerator([DIMENSIONS.bottomLeft, DIMENSIONS.bottomRight]))
 	   .attr("stroke", "white")
 	   .attr("stroke-width", STROKE_WIDTH)
+
+	let xDeciles = []
+	let yDeciles = []
+	for (let i = 1; i < 11; i++) {
+		xDeciles.push(DIMENSIONS.width * i/ 10)
+		yDeciles.push(DIMENSIONS.height * i/ 10)
+	}
+
+	for (let i = 0; i < 10; i++) {
+		let x = transformPoint({x: xDeciles[i], y: 0}).x
+		let y = transformPoint({x: 0, y: yDeciles[i]}).y
+		APP.append("text")
+			.attr("x", x - PADDING / 4)
+			.attr("y", DIMENSIONS.bottomLeft.y + PADDING / 2)
+			.text(xDeciles[i])
+			.attr("fill", "grey")
+		APP.append("text")
+			.attr("x", DIMENSIONS.bottomLeft.x - PADDING / 2)
+			.attr("y", y)
+			.text(yDeciles[i])
+			.attr("fill", "grey")
+		APP.append("rect")
+			.attr("x", DIMENSIONS.bottomLeft.x)
+			.attr("y", y)
+			.attr("width", DIMENSIONS.plotWidth)
+			.attr("height", DIMENSIONS.plotHeight / 10)
+			.attr("fill", "rgba(255,255,255,0.05)")
+		APP.append("path")
+			.attr("d", axisGenerator([{x: DIMENSIONS.bottomLeft.x, y: y}, {x: DIMENSIONS.bottomRight.x, y: y}]))
+			.attr("stroke", "rgba(255,255,255,0.2)")
+			.attr("stroke-width", STROKE_WIDTH)
+	}
 
 	PATH_AREA = APP.append("g")
 
