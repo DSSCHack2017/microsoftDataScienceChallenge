@@ -1,8 +1,11 @@
 let APP
 let WIDTH
 let HEIGHT
-let MARGINS
+let PADDING
 let PATH_AREA
+let DIMENSIONS
+let ASPECT_RATIO
+let STROKE_WIDTH
 
 const lineData = [
 	{
@@ -31,61 +34,94 @@ const lineData = [
 	}
 ]
 
-const lineGenerator = d3.line()
-						.x(d => MARGINS.left + d.x)
-						.y(d => HEIGHT - MARGINS.bottom  - d.y)
+const getDimensions = data => {
+	let dimensions = {
+		height: {
+			min: 0,
+			max: 0
+		},
+		width: {
+			min: 0,
+			max: 0
+		}
+	}
 
-const axisGenerator = d3.line()
-						.x(d => d.x)
-						.y(d => d.y)
+	if (data.length > 0) {
+		for (let point of data) {
+			if (point) {
+				if (point.x > dimensions.width.max) {
+					dimensions.width.max = point.x
+				}
+				if (point.y > dimensions.height.max) {
+					dimensions.height.max = point.y
+				}
+				if (point.x < dimensions.width.min) {
+					dimensions.width.min = point.x
+				}
+				if (point.y < dimensions.height.min) {
+					dimensions.height.min = point.y
+				}
+			}
+		}
+	}
+	return dimensions
+}
 
 const drawAxis = () => {
 
-	APP.attr("width", WIDTH)
-	   .attr("height", HEIGHT)
-	   .attr("preserveAspectRatio", "xMidYMid meet")
-	   .attr("viewBox", `0 0 ${WIDTH} ${HEIGHT}`)
+	const axisGenerator = d3.line().x(d => d.x).y(d => d.y)
+
+	APP.append("path")
+	   .attr("d", axisGenerator([DIMENSIONS.bottomLeft, DIMENSIONS.topLeft]))
+	   .attr("stroke", "white")
+	   .attr("stroke-width", STROKE_WIDTH)
+	APP.append("path")
+	   .attr("d", axisGenerator([DIMENSIONS.bottomLeft, DIMENSIONS.bottomRight]))
+	   .attr("stroke", "white")
+	   .attr("stroke-width", STROKE_WIDTH)
 
 	PATH_AREA = APP.append("g")
 
-	const xAxisCoords = [{x:MARGINS.right,y: HEIGHT - MARGINS.bottom},{x: MARGINS.right,y: MARGINS.top}]
-	const xAxis = APP.append("path")
-					 .attr("d", axisGenerator(xAxisCoords))
-					 .attr("stroke", "white")
-					 .attr("stroke-width", 2)
-					 .attr("fill", "none")
-
-	const yAxisCoords = [{x:MARGINS.right,y: HEIGHT - MARGINS.bottom},{x: WIDTH - MARGINS.left,y: HEIGHT - MARGINS.bottom}]
-	const yAxis = APP.append("path")
-					 .attr("d", axisGenerator(yAxisCoords))
-					 .attr("stroke", "white")
-					 .attr("stroke-width", 2)
-					 .attr("fill", "none")
-
-	const xLabel = "Width"
-	const yLabel = "Height"
-
 	APP.append("text")
-	   .text(xLabel)
-	   .attr("x", WIDTH - MARGINS.right)
-	   .attr("y", HEIGHT - MARGINS.bottom)
-
+	   .text("x-axis")
+	   .attr("x", WIDTH - PADDING)
+	   .attr("y", HEIGHT - PADDING)
 	APP.append("text")
-	   .text(yLabel)
-	   .attr("x", 20)
-	   .attr("y", MARGINS.top - 20)
+	   .text("y-axis")
+	   .attr("x", PADDING)
+	   .attr("y", PADDING)
+}
+
+const transformPoint = point => {
+	const newPoint = {
+		x: PADDING + (point.x * DIMENSIONS.plotWidth / DIMENSIONS.width),
+		y: HEIGHT - PADDING - (point.y * DIMENSIONS.plotHeight / DIMENSIONS.height)
+	}
+	return newPoint
 }
 
 const drawPaths = () => {
-	PATH_AREA.append("path")
+	const lineGenerator = d3.line()
+							.x(d => transformPoint(d).x)
+							.y(d => transformPoint(d).y)
+	APP.append("path")
 	   .attr("d", lineGenerator(lineData))
-	   .attr("stroke", "red")
-	   .attr("stroke-width", 2)
+	   .attr("stroke", "#0F608A")
+	   .attr("stroke-width", STROKE_WIDTH)
 	   .attr("fill", "none")
-	   .on("click", () => {
-			console.log("Ouch, don't click me!")
-			d3.event.stopPropagation()
-	   })
+
+	lineData.map( point => {
+		APP.append("circle")
+			.attr("cx", transformPoint(point).x)
+			.attr("cy", transformPoint(point).y)
+			.attr("r", 3)
+			.attr("fill", "#0F608A")
+			.attr("stroke", "none")
+			.on("click", () => {
+				console.log("Ouch, don't click me!")
+				d3.event.stopPropagation()
+			})
+	})
 }
 
 const flushPaths = () => {
@@ -94,15 +130,31 @@ const flushPaths = () => {
 
 const setup = () => {
 
+	const viewSizes = getDimensions(lineData)
+
 	APP = d3.select("#root")
+	PADDING = 30
+	ASPECT_RATIO = 720 / 480
 	WIDTH = 720
-	HEIGHT = 480
-	MARGINS = {
-		top: 40,
-		right: 40,
-		bottom: 40,
-		left: 40
+	HEIGHT = WIDTH / ASPECT_RATIO
+	STROKE_WIDTH = 1
+
+	DIMENSIONS = {
+		topLeft: {x: PADDING,y: PADDING},
+		bottomRight: {x: WIDTH - PADDING,y: HEIGHT - PADDING},
+		bottomLeft: {x:PADDING,y: HEIGHT - PADDING},
+
+		width: viewSizes.width.max - viewSizes.width.min,
+		height: viewSizes.height.max - viewSizes.height.min,
+
+		plotWidth: WIDTH - 2 * PADDING,
+		plotHeight: HEIGHT - 2 * PADDING
 	}
+
+	APP.attr("width", WIDTH)
+	   .attr("height", HEIGHT)
+	   .attr("preserveAspectRatio", "xMidYMid meet")
+	   .attr("viewBox", `0 0 ${WIDTH} ${HEIGHT}`)
 
 	drawAxis()
 
