@@ -47,13 +47,20 @@ def create_df_for_ticker(ticker):
 
 aapl = create_df_for_ticker('AAPL')
 aapl = aapl.fillna(method='backfill')
-# Initialize the model class.
-model = LinearRegression()
-# Fit the model to the training data.
-model.fit(list(map(lambda k: [k], aapl['Polarity'].tolist())), list(map(lambda k: [k], aapl['AAPL'].tolist())))
+aapl = aapl.drop('Subjectivity', 1)
+aapl.columns = ['x', 'y']
 
-print("fitting complete")
-print(model.predict(0.4))
+aapl.to_json("data/appl_complete.json", orient="records")
+
+# aapl.to_csv("data/appl_complete.csv")
+# # Initialize the model class.
+# model = LinearRegression()
+# # Fit the model to the training data.
+# model.fit(list(map(lambda k: [k], aapl['Polarity'].tolist())), list(map(lambda k: [k], aapl['AAPL'].tolist())))
+#
+# print("fitting complete")
+# print(model.coef_)
+# print(model.predict(0.4))
 
 # ax = aapl[:100].plot()
 # plt.show()
