@@ -1,11 +1,12 @@
 import requests
 from bs4 import BeautifulSoup
+import threading
 from datetime import timedelta, date
 
 
 # tickers = ['JP', 'KS', 'CH', 'HK', 'AAPL']
-# tickers = ['AAPL']
-tickers = ['JP', 'KS', 'CH', 'HK']
+tickers = ['AAPL']
+# tickers = ['JP', 'KS', 'CH', 'HK']
 
 def get_news(link):
     base_link = "http://www.reuters.com/"
@@ -42,12 +43,13 @@ def get_sentiment_for_date(ticker, date):
     day_news = ' '.join(list(map(lambda link: get_news(link['href']), links_to_articles)))
     if day_news:
         print(day_news)
-    return day_news
+    sentiments[ticker][date] = get_sentiment_of_news(day_news)
 
 
 def get_sentiment_of_news(news):
     return 1
 
+sentiments = {}
 
 def main():
 
@@ -55,7 +57,6 @@ def main():
         for n in range(int((end_date - start_date).days)):
             yield start_date + timedelta(n)
 
-    sentiments = {}
     # start_date = date(2007, 1, 4)
     # end_date = date(2016, 12, 31)
     start_date = date(2013, 9, 9)
@@ -65,7 +66,9 @@ def main():
         for single_date in daterange(start_date, end_date):
             str_date = single_date.strftime("%m%d%Y")
             print(str_date)
-            sentiments[ticker][str(single_date)] = get_sentiment_for_date(ticker, str_date)
+            t = threading.Thread(target=get_sentiment_for_date, args=(ticker, str_date))
+            t.start()
+            t.join()
     print(sentiments)
 
 main()
