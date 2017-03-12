@@ -45,14 +45,10 @@ def create_df_for_ticker(ticker):
 
     return cd
 
-aapl = create_df_for_ticker('AAPL')
-aapl = aapl.fillna(method='backfill')
-aapl = aapl.drop('Subjectivity', 1)
-aapl.columns = ['x', 'y']
+msft = create_df_for_ticker('MSFT')
+msft = msft.fillna(method='backfill')
 
-aapl.to_json("data/appl_complete.json", orient="records")
-
-# aapl.to_csv("data/appl_complete.csv")
+msft.to_csv("data/msft_complete.csv")
 # # Initialize the model class.
 # model = LinearRegression()
 # # Fit the model to the training data.
