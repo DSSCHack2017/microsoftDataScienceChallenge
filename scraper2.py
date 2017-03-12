@@ -6,7 +6,7 @@ from textblob import TextBlob
 import json
 
 
-tickers = ['AAPL', 'MSFT', 'GOOG']
+tickers = ['FB']
 
 
 def get_news(link):
@@ -23,6 +23,7 @@ def get_news(link):
     return news
 
 
+# date MMDDYYYY
 def get_sentiment_for_date(ticker, date):
     """
     Args
@@ -49,8 +50,6 @@ def get_sentiment_for_date(ticker, date):
 def get_sentiment_of_news(news):
     sent = TextBlob(news)
     return [sent.sentiment.polarity, sent.sentiment.subjectivity]
-
-
 sentiments = {}
 
 
