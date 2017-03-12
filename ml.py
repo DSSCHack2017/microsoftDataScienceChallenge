@@ -2,6 +2,7 @@ from get_stock_data import *
 import json
 import pandas as pd
 import matplotlib.pyplot as plt
+from sklearn.linear_model import LinearRegression
 import datetime
 
 
@@ -45,8 +46,17 @@ def create_df_for_ticker(ticker):
     return cd
 
 aapl = create_df_for_ticker('AAPL')
-ax = aapl.plot()
-plt.show()
+aapl = aapl.fillna(method='backfill')
+# Initialize the model class.
+model = LinearRegression()
+# Fit the model to the training data.
+model.fit(list(map(lambda k: [k], aapl['Polarity'].tolist())), list(map(lambda k: [k], aapl['AAPL'].tolist())))
+
+print("fitting complete")
+print(model.predict(0.4))
+
+# ax = aapl[:100].plot()
+# plt.show()
 # goog = create_df_for_ticker('GOOG')
 # msft = create_df_for_ticker('MSFT')
 
