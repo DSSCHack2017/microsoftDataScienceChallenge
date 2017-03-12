@@ -42,7 +42,7 @@ def create_df_for_ticker(ticker):
     cd.columns = ['Polarity', 'Subjectivity']
     cd = df.join(cd)
     cd = cd.drop('SPY', 1)
-    cd[ticker] = cd[ticker].apply(lambda x: 1 if x > 0 else 0)
+    # cd[ticker] = cd[ticker].apply(lambda x: 1 if x > 0 else 0)
 
     return cd
 
@@ -51,7 +51,7 @@ aapl = create_df_for_ticker('AAPL')
 aapl = aapl.dropna(axis='index')
 
 print(aapl)
-aapl.to_csv("data/aapl_binary_removed_nan.csv")
+aapl.to_csv("data/aapl_complete_removed_nan.csv")
 # # Initialize the model class.
 # model = LinearRegression()
 # # Fit the model to the training data.
