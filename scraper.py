@@ -23,7 +23,6 @@ def get_news(link):
     return news
 
 
-# date MMDDYYYY
 def get_sentiment_for_date(ticker, date):
     """
     Args
@@ -50,6 +49,8 @@ def get_sentiment_for_date(ticker, date):
 def get_sentiment_of_news(news):
     sent = TextBlob(news)
     return [sent.sentiment.polarity, sent.sentiment.subjectivity]
+
+
 sentiments = {}
 
 
