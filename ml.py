@@ -47,20 +47,21 @@ def create_df_for_ticker(ticker):
     return cd
 
 aapl = create_df_for_ticker('AAPL')
-aapl = aapl.fillna(method='backfill')
+# aapl = aapl.fillna(method='backfill')
+aapl = aapl.dropna(axis='index')
 
 print(aapl)
-aapl.to_csv("data/aapl_binary.csv")
+aapl.to_csv("data/aapl_binary_removed_nan.csv")
 # # Initialize the model class.
 # model = LinearRegression()
 # # Fit the model to the training data.
 # model.fit(list(map(lambda k: [k], aapl['Polarity'].tolist())), list(map(lambda k: [k], aapl['AAPL'].tolist())))
-#
+
 # print("fitting complete")
 # print(model.coef_)
 # print(model.predict(0.4))
 
-# ax = aapl[:100].plot()
+# ax = aapl.plot()
 # plt.show()
 # goog = create_df_for_ticker('GOOG')
 # msft = create_df_for_ticker('MSFT')
